@@ -1,0 +1,4 @@
+com\example\helloworld\controller\TestController.class
+com\example\helloworld\swagger\SwaggerConfig.class
+com\example\helloworld\Application.class
+com\example\helloworld\StreamLambdaHandler.class
