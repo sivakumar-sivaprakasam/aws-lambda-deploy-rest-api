@@ -76,3 +76,71 @@ $ curl -s https://xxxxxxx.execute-api.us-west-2.amazonaws.com/Prod/ping | python
     "pong": "Hello, World!"
 }
 ```
+
+# Steps to deploy helloworld serverless API in Lambda from Container Image & Access it through Application Load Balancer
+
+Following are the steps required to build Docker images & push the image to AWS ECR 
+
+Pre-requisites
+
+* [AWS CLI](https://aws.amazon.com/cli/)
+* Maven](https://maven.apache.org/)
+* Docker Desktop
+
+Steps:
+
+- Create docker image by running `docker build . -t <image name>:<version>`
+- Once the image is created, use following steps to publish the image to AWS ECR
+
+```
+-- Login
+aws ecr get-login-password --region <region> | docker login --username AWS --password-stdin <account id>.dkr.ecr.<region>.amazonaws.com
+
+-- Create Repo in ECR
+aws ecr create-repository --repository-name <repo name> --image-scanning-configuration scanOnPush=true --image-tag-mutability MUTABLE
+
+-- Tag the image
+docker tag <image name>:<version> <account id>.dkr.ecr.<region>.amazonaws.com/<image name>:<version>
+
+-- Push image to ECR
+docker push <account id>.dkr.ecr.<region>.amazonaws.com/<image name>:<version>
+```
+
+After image is pushed to AWS ECR, find below the steps to setup Lambda 
+
+- Login to AWS Console
+- Select appropriate region where you push docker images
+- Open Lambda
+- Launch `Create Function`
+- Select `Container Image` option
+- Select your docker image from dropdown
+- Let AWS create new IAM role
+
+Once the Lambda is created, open IAM and go to the role created by AWS. In that click `Add Permissions` and add following IAM policy
+
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:CreateNetworkInterface",
+                "ec2:DeleteNetworkInterface",
+                "ec2:AttachNetworkInterface"
+            ],
+            "Resource": "arn:aws:ec2:<region>:<account id>:*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeInstances",
+                "ec2:DescribeNetworkInterfaces"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+Once Application Load Balancer & Target Group for Lambda is created, you can access REST API using Application Load Balancer endpoint
