@@ -3,7 +3,7 @@ version = 0.1
 [default.deploy]
 [default.deploy.parameters]
 stack_name = "helloworld-app"
-s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1xgfmbugz89na"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-rv3p3nmr6fqq"
 s3_prefix = "helloworld-app"
 region = "ap-southeast-1"
 confirm_changeset = true
